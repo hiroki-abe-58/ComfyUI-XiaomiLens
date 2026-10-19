@@ -34,8 +34,8 @@ Windows 11、RTX 5090、ComfyUI v0.42.1（詳細は [docs/VERIFICATION.md](docs/
 
 ## インストール
 
-1. ComfyUI v0.38.0 以降、Python 3.10 以上、**Transformers 5.4.0 以上**。CUDA GPU を推奨します（実測の VRAM ピーク: 1 MP 以下で
-   9.2 GB、8 MP で 15 GB）。
+1. ComfyUI v0.38.0 以降、Python 3.10 以上、**Transformers 5.4.0 以上**。CUDA GPU を推奨します（実測の VRAM ピーク: 1 MP で 9.5 GB、
+   3 MP で 11 GB、8 MP で 15 GB）。
 2. `custom_nodes` に clone して `requirements.txt` をインストールします。Transformers 4.x の環境では 5.x に上がるため、4.x が必要な
    他のノードが動かなくなる場合があります。
 3. モデル（9.2 GB）をダウンロードします。リビジョン固定、全ファイルの SHA-256 を確認します:

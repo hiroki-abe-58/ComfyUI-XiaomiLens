@@ -36,11 +36,12 @@ mask and box each; and an instruction, answered with the spoon. RTX 5090; masks 
 Typical uses: **Segment → Grow Mask → an inpainting sampler** (replace what you described); **Segment → Invert Mask → Join Image
 with Alpha** (cut-out, the shipped `cut_out.json`); **instance_masks → per-object edits**.
 
-| RTX 5090 (bfloat16) | Time | VRAM peak |
+| RTX 5090 (bfloat16, SDPA decoder) | Time | VRAM peak |
 | --- | --- | --- |
-| One object, image up to 1 MP | 1.5 – 3 s | 9.2 GB |
-| 23 instances (`coin`, 0.1 MP) | 29 s (the answer is long) | 9.2 GB |
-| One object, 8 MP image | 6 s | 15 GB |
+| One object, 0.1 – 0.3 MP photos | 1.5 – 3 s | 9.1 GB |
+| One object, 1 MP / 3 MP | 1.6 s / 2.9 s | 9.5 GB / 11 GB |
+| One object, 8 MP | 6 s | 15 GB |
+| 23 instances (`coin`, 0.1 MP) | 29 s (the answer is long) | 9.1 GB |
 
 On the CPU (24 threads, bfloat16, about 10 GB of RAM) one object in a 0.14 MP photo took 6.6 s, with the same box as on the GPU.
 Measured here with the model loaded (loading takes 5–10 s). Without the optional `causal-conv1d` and `flash-linear-attention`
@@ -71,7 +72,7 @@ upstream does), Linux and macOS outside CI, AMD or Apple GPUs, GPUs other than t
 ## Install
 
 1. ComfyUI with the V3 node API (**v0.38.0** or later), Python 3.10+, **Transformers 5.4.0 or newer** (Qwen3.5 support). A CUDA
-   GPU is recommended: the measured peaks are 9.2 GB of VRAM for images up to 1 MP and 15 GB at 8 MP.
+   GPU is recommended: the measured VRAM peaks are 9.5 GB at 1 MP, 11 GB at 3 MP and 15 GB at 8 MP.
 2. Clone this repository into `ComfyUI/custom_nodes/` and install its requirement into ComfyUI's Python:
 
    ```
@@ -104,7 +105,8 @@ upstream does), Linux and macOS outside CI, AMD or Apple GPUs, GPUs other than t
 - `decoder_attention` (the mask decoder): `auto` = flash-attn when installed (upstream's default), otherwise **SDPA**. `mha` is
   what upstream falls back to without flash-attn; it gives upstream's exact bytes there, but it holds the whole patch-by-patch
   attention matrix: about 2 GB for a 2 MP image and over 30 GB at 8 MP (it ran out of memory on the RTX 5090). SDPA and MHA give
-  the same answers and boxes; their masks agree to an IoU of 0.997 or more (VERIFICATION.md).
+  the same answers and boxes; their masks agree to an IoU of 0.997 or more (VERIFICATION.md). Proposed upstream as
+  [SeerRay-Lab/Xiaomi-Lens-0#3](https://github.com/SeerRay-Lab/Xiaomi-Lens-0/pull/3).
 - `after_run`: `keep on device` for fast repeated runs, `move to CPU` to free about 9 GB of VRAM after each run (for workflows
   that then load a large image model).
 

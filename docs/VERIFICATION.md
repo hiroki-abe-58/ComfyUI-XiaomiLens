@@ -76,8 +76,19 @@ the model's numerics in Transformers.
 | `mha` (upstream without flash-attn) | out of memory: nn.MultiheadAttention tried to allocate **30.75 GiB** for one attention matrix (16 heads x 32,768² in bfloat16) |
 | `sdpa` (the pack's `auto` without flash-attn) | 6.5 s and 5.9 s, **15.05 GB** peak; one mask each at 3840 x 2560 |
 
+By image size (upstream's own infer.py steps, "the coffee cup" on `coffee` resized; Transformers 5.4.0), the VRAM the mask pass
+adds over the loaded model, and the request's peak:
+
+| Image | Patches | MHA: mask pass / peak | SDPA: mask pass / peak | Boxes |
+| --- | --- | --- | --- | --- |
+| 0.5 MP | 1,944 | +0.86 / 9.51 GB | +0.46 / 9.11 GB | same |
+| 1 MP | 3,952 | +2.58 / 11.24 GB | +0.83 / 9.50 GB | same |
+| 2 MP | 7,776 | +8.53 / 17.22 GB | +1.55 / 10.24 GB | same |
+| 3 MP | 11,616 | +18.02 / 26.73 GB | +2.28 / 10.99 GB | same |
+
 The Loader's `decoder_attention` therefore defaults to flash-attn when it is installed (upstream's default) and to SDPA
-otherwise; `mha` stays available for upstream's exact bytes on smaller images.
+otherwise; `mha` stays available for upstream's exact bytes on smaller images. The same change was proposed upstream
+(SeerRay-Lab/Xiaomi-Lens-0#3, with these measurements).
 
 ## 5. Speed and memory (RTX 5090, bfloat16, model loaded, reference runs)
 
