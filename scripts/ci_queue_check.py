@@ -120,7 +120,8 @@ def main(argv=None) -> int:
         raise SystemExit(f"--base-dir: {pack} is not installed")
     inputs, output = base / "input", base / "output"
     inputs.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(comfy / "input" / "example.png", inputs / "example.png")
+    if (inputs / "example.png").resolve() != (comfy / "input" / "example.png").resolve():  # --base-dir may be the ComfyUI folder
+        shutil.copyfile(comfy / "input" / "example.png", inputs / "example.png")
     yaml = work / "extra_model_paths.yaml"
     yaml.write_text(f"xiaomi_lens_ci:\n  base_path: {models.parent.as_posix()}\n  xiaomi_lens: {models.name}\n", encoding="utf-8")
 
