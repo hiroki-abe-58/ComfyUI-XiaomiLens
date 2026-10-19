@@ -1,0 +1,26 @@
+[project]
+name = "xiaomi-lens-segmentation"
+description = "Unofficial ComfyUI nodes for Xiaomi-Lens-0 (4B, Apache-2.0): masks and boxes for the objects a text describes, including reasoning requests (\"what would you use to stir the drink?\"). Same output as the official inference code, bit for bit. Masks at the input image's size for inpainting and cut-outs."
+version = "0.1.0"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+dependencies = ["transformers>=5.4.0"]
+
+[project.urls]
+Repository = "https://github.com/hiroki-abe-58/ComfyUI-XiaomiLens"
+
+[tool.comfy]
+PublisherId = "hiroki-abe-58"
+DisplayName = "Xiaomi-Lens-0 Segmentation for ComfyUI"
+Icon = ""
+
+[tool.ruff]
+line-length = 180
+target-version = "py310"
+extend-exclude = ["xiaomi_lens_comfy/vendor/xiaomi_lens"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

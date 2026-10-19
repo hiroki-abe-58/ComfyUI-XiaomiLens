@@ -1,0 +1,117 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# CPU only. The real model (9 GB, 4B parameters) is compared with the official code on a GPU outside CI (docs/VERIFICATION.md).
+# Here tools/download_model.py --no-weights fetches the configuration, tokenizer and processor files at the pinned revision (SHA-256
+# checked), scripts/make_tiny_model.py builds a tiny checkpoint of the same architecture from them, and the tests and a real
+# ComfyUI queue compare the pack with the official code (the upstream checkout at the pinned commit) on that model, bit for bit.
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        comfyui: ["v0.38.0"]
+        os: [ubuntu-24.04, windows-latest]
+        python: ["3.12"]
+        torch: ["2.14.1"]
+        torchvision: ["0.29.1"]
+        transformers: [""]  # the newest release ComfyUI's and this pack's requirements allow
+        include:
+          # the version upstream tested, on the oldest Python and an older torch
+          - os: ubuntu-24.04
+            comfyui: "v0.38.0"
+            python: "3.10"
+            torch: "2.8.0"
+            torchvision: "0.23.0"
+            transformers: "5.4.0"
+          # the current ComfyUI release
+          - os: ubuntu-24.04
+            comfyui: "v0.42.1"
+            python: "3.12"
+            torch: "2.14.1"
+            torchvision: "0.29.1"
+            transformers: ""
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      UPSTREAM_COMMIT: 157b7bcb0b5010e81df858f5e9e4aa55a2fa9819
+      HF_HUB_DISABLE_TELEMETRY: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: ComfyUI-XiaomiLens
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: ComfyUI and upstream checkouts (pinned)
+        run: |
+          git -c core.autocrlf=false clone --quiet --depth 1 --branch "${{ matrix.comfyui }}" https://github.com/Comfy-Org/ComfyUI.git refs/ComfyUI
+          $pinned = @{ 'v0.38.0' = '6b747c0428c343e1417219641db93a4fb7cb69ae'; 'v0.42.1' = '63be2f9b82ad0dac88a7ceaa28a9cf3154125a18' }["${{ matrix.comfyui }}"]
+          if (-not $pinned -or (git -C refs/ComfyUI rev-parse HEAD) -ne $pinned) { throw "ComfyUI commit mismatch" }
+          git -c core.autocrlf=false clone --quiet --filter=blob:none https://github.com/SeerRay-Lab/Xiaomi-Lens-0.git refs/Xiaomi-Lens-0
+          git -C refs/Xiaomi-Lens-0 -c core.autocrlf=false checkout --quiet $env:UPSTREAM_COMMIT
+          if ((git -C refs/Xiaomi-Lens-0 rev-parse HEAD) -ne $env:UPSTREAM_COMMIT) { throw "upstream commit mismatch" }
+
+      - name: Install (CPU)
+        run: |
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true   # a failing pip must fail the step
+          python -m pip install --upgrade pip
+          # CPU torch first: on Linux ComfyUI's unpinned `torch` requirement would otherwise pull the CUDA build and its libraries
+          pip install torch==${{ matrix.torch }} torchvision==${{ matrix.torchvision }} --index-url https://download.pytorch.org/whl/cpu
+          pip install -r refs/ComfyUI/requirements.txt -r ComfyUI-XiaomiLens/requirements.txt pytest ruff
+          if ("${{ matrix.transformers }}") { pip install "transformers==${{ matrix.transformers }}" }
+          pip list
+
+      - name: Tokenizer and processor files (pinned revision, SHA-256 checked) and the tiny checkpoint
+        run: |
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true
+          python ComfyUI-XiaomiLens/tools/download_model.py --models-dir refs/lens-files --no-weights
+          python ComfyUI-XiaomiLens/scripts/make_tiny_model.py --source refs/lens-files/Xiaomi-Lens-0 --out models/xiaomi_lens/Xiaomi-Lens-0
+
+      - name: Lint
+        run: ruff check --no-cache ComfyUI-XiaomiLens
+
+      - name: Vendored code equals the pinned upstream commit (with the one documented patch)
+        run: python ComfyUI-XiaomiLens/scripts/vendor_sync.py --upstream refs/Xiaomi-Lens-0 --check
+
+      - name: No absolute local paths in the repository
+        run: |
+          $files = git -C ComfyUI-XiaomiLens ls-files | Where-Object { $_ -notmatch '\.(png|jpg|webp|gif)$' } | ForEach-Object { Join-Path ComfyUI-XiaomiLens $_ }
+          $hits = $files | Select-String -Pattern '[A-Za-z]:\\{1,2}[A-Za-z0-9_.-]+\\|/home/[a-z]+/|/Users/[A-Za-z]+/'
+          if ($hits) { $hits | ForEach-Object { "$($_.Path):$($_.LineNumber)" }; throw "absolute local path found" }
+
+      - name: Tests (references required, nothing may be skipped)
+        env:
+          XL_COMFYUI_DIR: ${{ github.workspace }}/refs/ComfyUI
+          XL_TINY_DIR: ${{ github.workspace }}/models/xiaomi_lens/Xiaomi-Lens-0
+          XL_UPSTREAM_DIR: ${{ github.workspace }}/refs/Xiaomi-Lens-0
+          XL_REQUIRE_REFERENCES: "1"
+        run: |
+          Set-Location ComfyUI-XiaomiLens
+          python -m pytest tests -q -rs -p no:cacheprovider -W ignore::DeprecationWarning -W ignore::FutureWarning --durations=10
+
+      - name: Real ComfyUI queue on CPU (tiny checkpoint)
+        run: |
+          python ComfyUI-XiaomiLens/scripts/ci_queue_check.py --comfyui refs/ComfyUI --models-dir models/xiaomi_lens --upstream refs/Xiaomi-Lens-0 --workdir queue-logs
+
+      - name: ComfyUI log on failure
+        if: failure()
+        run: |
+          if (Test-Path queue-logs/comfyui.log) { Get-Content queue-logs/comfyui.log -Tail 120 }

@@ -1,0 +1,7 @@
+{
+  "1": {"class_type": "LoadImage", "inputs": {"image": "example.png"}},
+  "2": {"class_type": "XiaomiLensLoader", "inputs": {"model": "Xiaomi-Lens-0", "device": "auto", "attention": "auto", "decoder_attention": "auto", "after_run": "keep on device"}},
+  "3": {"class_type": "XiaomiLensSegment", "inputs": {"model": ["2", 0], "image": ["1", 0], "query": "Which part of the picture would you replace to change the season to winter? Report bbox coordinates and masks.", "prompt_mode": "instruction", "threshold": 0.5, "max_new_tokens": 16384}},
+  "4": {"class_type": "SaveImage", "inputs": {"images": ["3", 2], "filename_prefix": "xiaomi_lens/reasoning"}},
+  "5": {"class_type": "PreviewAny", "inputs": {"source": ["3", 3]}}
+}

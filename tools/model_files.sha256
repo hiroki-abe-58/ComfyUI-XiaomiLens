@@ -1,0 +1,13 @@
+# SHA-256 of the files of SeerRay-Lab/Xiaomi-Lens-0 at revision 9452efab96fa8b886e7a0f89e390219ba59deddb (paths below models/xiaomi_lens)
+312492388fa168cd35c559afe2ba202e57ea4dc02824e826b5db96d2974279e6  Xiaomi-Lens-0/LICENSE
+650a44eb6a8c7d73e2a75bf2a71c33d8778707066f3c37edbde424afa6860277  Xiaomi-Lens-0/README.md
+a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715  Xiaomi-Lens-0/chat_template.jinja
+c7700d967b39ecafc30179ff2d386e34edbadd94c87d662e2c1495e9228fbf0c  Xiaomi-Lens-0/config.json
+8f094695b0ddd9f6a25294a2984a5978dd212e31ef67d2ce428744e1a87d0c3f  Xiaomi-Lens-0/generation_config.json
+dbba202ca511f01f2f96980552ff01afcd13f6dc2519c38d6eb07217e77e95dd  Xiaomi-Lens-0/model-00001-of-00003.safetensors
+7473041185b1e2648a15156fb5b11cff9805d4ef5da0481ec4a2726e8bb7a25b  Xiaomi-Lens-0/model-00002-of-00003.safetensors
+055c79154acf658b3356d5d6e2691e76864aebe94d4a9fd6fbed874ab43b840c  Xiaomi-Lens-0/model-00003-of-00003.safetensors
+f4e33dd494d1711f24b766f8583fb2fe9ec258bca524e12064da30946f8b2a0b  Xiaomi-Lens-0/model.safetensors.index.json
+f984c51c5a4ff8a2096b37b34c6fe5c4d80abbf111d13bf0d0cb4b8b039ff670  Xiaomi-Lens-0/processor_config.json
+e88b82e6740f387efc9d6db27f42de96b50d9713305c3678745f094ffaca06bb  Xiaomi-Lens-0/tokenizer.json
+c659d66a717e5c8e0246a65f3d54912d6e22a8f15804b42f18279c1d3d528290  Xiaomi-Lens-0/tokenizer_config.json

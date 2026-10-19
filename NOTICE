@@ -1,0 +1,25 @@
+Xiaomi-Lens-0 Segmentation for ComfyUI
+Copyright (c) 2026 hiroki-abe-58. The code of this node pack (everything outside xiaomi_lens_comfy/vendor) is licensed under
+the MIT License (LICENSE).
+
+This node pack is an unofficial integration. It is not affiliated with or endorsed by Xiaomi Corporation, the Xiaomi-Lens-0
+authors or Comfy Org. "Xiaomi" and "Xiaomi-Lens-0" are used only to name the model this pack runs.
+
+Third-party code included in this repository
+---------------------------------------------
+
+xiaomi_lens_comfy/vendor/xiaomi_lens
+    From https://github.com/SeerRay-Lab/Xiaomi-Lens-0, commit 157b7bcb0b5010e81df858f5e9e4aa55a2fa9819.
+    Copyright 2026 Xiaomi Corporation. Apache License 2.0 (xiaomi_lens_comfy/vendor/LICENSE).
+    Copied files are unchanged; model/pixel_mask_decoder.py is modified (one line, marked at the top of the file). Details in
+    xiaomi_lens_comfy/vendor/UPSTREAM.md.
+
+Models (not included)
+---------------------
+No model weights are included or downloaded by the nodes. tools/download_model.py fetches, when you run it:
+- SeerRay-Lab/Xiaomi-Lens-0 (Apache-2.0; derived from Qwen3.5-4B, Apache-2.0, Copyright 2026 Alibaba Cloud).
+
+Documentation image
+-------------------
+docs/images/examples.png shows this pack's output on three sample photos distributed with scikit-image: "chelsea" (CC0, Stefan
+van der Walt), "coins" (Brooklyn Museum collection, no known copyright restrictions) and "coffee" (CC0, Rachel Michetti).

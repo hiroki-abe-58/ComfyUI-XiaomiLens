@@ -1,0 +1,8 @@
+{
+  "1": {"class_type": "LoadImage", "inputs": {"image": "example.png"}},
+  "2": {"class_type": "XiaomiLensLoader", "inputs": {"model": "Xiaomi-Lens-0", "device": "auto", "attention": "auto", "decoder_attention": "auto", "after_run": "keep on device"}},
+  "3": {"class_type": "XiaomiLensSegment", "inputs": {"model": ["2", 0], "image": ["1", 0], "query": "the cartoon character", "prompt_mode": "find", "threshold": 0.5, "max_new_tokens": 16384}},
+  "4": {"class_type": "InvertMask", "inputs": {"mask": ["3", 0]}},
+  "5": {"class_type": "JoinImageWithAlpha", "inputs": {"image": ["1", 0], "alpha": ["4", 0]}},
+  "6": {"class_type": "SaveImage", "inputs": {"images": ["5", 0], "filename_prefix": "xiaomi_lens/cutout"}}
+}
