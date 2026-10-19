@@ -111,7 +111,19 @@ Also: the same job again (after other jobs, with `after_run` = `move to CPU`) ga
 model and an unknown prompt mode were rejected by ComfyUI's validation; an empty query failed with "the query is empty".
 The same check passed on the CPU with the tiny checkpoint (ComfyUI v0.42.1), as CI runs it.
 
-## 7. Tests (CPU, tiny checkpoint)
+## 7. Clean install
+
+A fresh ComfyUI v0.42.1 checkout and a fresh Python 3.12 environment (PyTorch 2.14.1+cu130, ComfyUI's requirements, which
+bring Transformers 5.20.1), then `git clone` of this repository into `custom_nodes` and `pip install -r requirements.txt` (nothing
+new to install), then `tools/download_model.py --models-dir models/xiaomi_lens`: all 12 files downloaded from the Hub at the pinned
+revision and verified. The GPU real-queue check of section 6 against that installation (`--base-dir` = the ComfyUI folder, the
+pack as cloned, the model as downloaded) passed with the same results; the cloned working tree was unchanged afterwards.
+
+The Registry package (`comfy node validate` and `comfy node pack`, comfy-cli 1.22.0, on the committed tree): validation passed;
+the archive holds only the node (no tests, scripts, images or weights) and none of the scanned patterns (environment, network or
+process code, absolute paths, tokens).
+
+## 8. Tests (CPU, tiny checkpoint)
 
 `tests/` (41 tests) with ComfyUI v0.42.1 and Transformers 5.20.1, every reference required: the pack against infer.py's
 functions in the same process on the tiny checkpoint (three image sizes; teacher-forced completions with a mask inside
@@ -123,6 +135,10 @@ network or process code in what ships).
 The tiny checkpoint (`scripts/make_tiny_model.py`) has the real architecture and tokenizer with small widths; two weight edits
 make its greedy answer `</think><|mask|><|im_end|>` so that the whole mask path runs. Its masks mean nothing; it only serves to
 compare the pack with the official code.
+
+CI (GitHub Actions, CPU) runs the same 41 tests and the real-queue check with the tiny checkpoint on four jobs: ComfyUI v0.38.0
+on Ubuntu and Windows (Python 3.12, PyTorch 2.14.1, Transformers 5.20.1), ComfyUI v0.38.0 on Ubuntu with Python 3.10, PyTorch
+2.8.0 and Transformers 5.4.0, and ComfyUI v0.42.1 on Ubuntu; all passed with nothing skipped.
 
 ## Not checked
 

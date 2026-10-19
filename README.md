@@ -56,6 +56,9 @@ Windows 11, RTX 5090, ComfyUI v0.42.1; details and raw numbers in [docs/VERIFICA
   identical bytes run to run.
 - **Real ComfyUI queue on the RTX 5090:** the three shipped workflows on ComfyUI's own `example.png`; the saved masks, the
   previews and the cut-out's alpha equal the official output pixel for pixel, the instruction's answer is the official text.
+- **Clean install:** fresh ComfyUI v0.42.1 and Python environment, `git clone` of this repository, `pip install -r
+  requirements.txt` (nothing new: ComfyUI already brings Transformers 5.x), the model downloaded with `tools/download_model.py`
+  (SHA-256 verified), and the real-queue check above against that installation.
 - **CI** (GitHub Actions; Ubuntu and Windows; ComfyUI v0.38.0 and v0.42.1; Transformers 5.4.0 and the newest): a tiny checkpoint
   with the real architecture and tokenizer, the pack compared with the official `infer.py` in the same process, the vendored code
   compared with the pinned upstream commit, ComfyUI's validation of the workflows, and a real ComfyUI queue compared with the
