@@ -8,3 +8,6 @@ docs/images/
 .gitignore
 .gitattributes
 .comfyignore
+__pycache__/
+.ruff_cache/
+.pytest_cache/
